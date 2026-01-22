@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 var app = builder.Build();
 
@@ -25,4 +27,25 @@ public class TaskItem
 
     public int CategoryId { get; set; }
     public Category? Category { get; set; }
+}
+
+public class AppDbContext : DbContext
+{
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) {  }
+
+    public DbSet<TaskItem> Tasks => Set<TaskItem>();
+    public DbSet<Category> Categories => Set<Category>();
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<TaskItem>()
+            .HasOne(t => t.Category)
+            .WithMany(c => c.Tasks)
+            .HasForeignKey(t => t.CategoryId);
+
+        modelBuilder.Entity<Category>()
+            .HasData(new { Id = 1, Name = "仕事" });
+    }
 }
